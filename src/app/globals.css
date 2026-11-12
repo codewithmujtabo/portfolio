@@ -1,30 +1,187 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
-/* :root { 
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ---------- Design tokens ----------
+   #111111  ink      — base canvas
+   #8B253B  crimson  — brand accent (fills, glows, 3D)
+   #F5F5F5  bone     — primary text
+   #E35D7A  rose     — lighter crimson for *text* on dark (crimson alone is ~2.2:1, too low for type)
+*/
+@theme {
+  --color-ink: #111111;
+  --color-ink-2: #161616;
+  --color-ink-3: #1d1d1d;
+  --color-crimson: #8b253b;
+  --color-crimson-deep: #5e1527;
+  --color-rose: #e35d7a;
+  --color-bone: #f5f5f5;
+  --color-mute: #9a9a9a;
+  --color-line: rgb(245 245 245 / 0.09);
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-display: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-marquee-y: marquee-y 22s linear infinite;
+  --animate-marquee-y-rev: marquee-y 22s linear infinite reverse;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-scroll-line: scroll-line 2.2s var(--ease-out-expo) infinite;
+  --animate-sheen: sheen 4s linear infinite;
+
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+  @keyframes marquee-y {
+    to { transform: translateY(-50%); }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(227 93 122 / 0.6); }
+    50% { box-shadow: 0 0 0 6px rgb(227 93 122 / 0); }
+  }
+  @keyframes scroll-line {
+    0% { transform: scaleY(0); transform-origin: top; }
+    45% { transform: scaleY(1); transform-origin: top; }
+    55% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+  @keyframes sheen {
+    to { background-position: 200% center; }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-} */
-
 html {
-  scroll-behavior: smooth;
+  overflow-x: clip;
+  background: var(--color-ink);
+  color: var(--color-bone);
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-ink);
+  font-family: var(--font-sans);
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-crimson);
+  color: var(--color-bone);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-rose);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Custom cursor: hide the native one only on fine pointers once the JS cursor is mounted */
+@media (pointer: fine) {
+  html.has-cursor,
+  html.has-cursor a,
+  html.has-cursor button,
+  html.has-cursor [role="button"] {
+    cursor: none;
+  }
+}
+
+/* ---------- Atmosphere ---------- */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(245 245 245 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(245 245 245 / 0.045) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+.grain {
+  pointer-events: none;
+  position: absolute;
+  inset: -50%;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: grain 1.2s steps(6) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -4%); }
+  60% { transform: translate(-4%, -1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(245 245 245 / 0.35);
+}
+
+.text-sheen {
+  background: linear-gradient(100deg, var(--color-bone) 20%, var(--color-rose) 40%, var(--color-bone) 60%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: var(--animate-sheen);
+}
+
+/* HUD corner brackets */
+.hud-corners {
+  --c: rgb(245 245 245 / 0.35);
+  background:
+    linear-gradient(var(--c), var(--c)) top left / 14px 1px,
+    linear-gradient(var(--c), var(--c)) top left / 1px 14px,
+    linear-gradient(var(--c), var(--c)) top right / 14px 1px,
+    linear-gradient(var(--c), var(--c)) top right / 1px 14px,
+    linear-gradient(var(--c), var(--c)) bottom left / 14px 1px,
+    linear-gradient(var(--c), var(--c)) bottom left / 1px 14px,
+    linear-gradient(var(--c), var(--c)) bottom right / 14px 1px,
+    linear-gradient(var(--c), var(--c)) bottom right / 1px 14px;
+  background-repeat: no-repeat;
+}
+
+/* Spotlight that follows the pointer inside .spotlight cards (set by TiltCard) */
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--spot-o, 0);
+  transition: opacity 0.4s;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(139 37 59 / 0.28), transparent 60%);
+  z-index: 0;
+}
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  opacity: var(--spot-o, 0);
+  transition: opacity 0.4s;
+  background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%), rgb(227 93 122 / 0.8), transparent 60%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.mask-fade-y {
+  mask-image: linear-gradient(to bottom, transparent, #000 15%, #000 85%, transparent);
+}
+.mask-fade-x {
+  mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain,
+  .text-sheen {
+    animation: none;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }
